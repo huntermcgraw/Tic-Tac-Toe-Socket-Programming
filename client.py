@@ -13,11 +13,17 @@ if serverName == 'localhost':
 
 while True:
 
+    if serverName == 'localhost':
+        sentence = input('Input lowercase sentence:')
+        clientSocket.send(sentence.encode())
+        modifiedSentence = clientSocket.recv(1024)
+        print ('From Server:', modifiedSentence.decode())
+        if sentence == 'q':
+            break
+    else:
+        modifiedSentence = clientSocket.recv(1024)
+        print('From Server:', modifiedSentence.decode())
+        sentence = input('Input lowercase sentence:')
+        clientSocket.send(sentence.encode())
 
-    sentence = input('Input lowercase sentence:')
-    clientSocket.send(sentence.encode())
-    modifiedSentence = clientSocket.recv(1024)
-    print ('From Server:', modifiedSentence.decode())
-    if sentence == 'q':
-        break
 clientSocket.close()
