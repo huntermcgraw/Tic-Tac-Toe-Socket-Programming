@@ -18,10 +18,14 @@ def newClient(connectionSocket):
         connectionSocket.send(capitalizedSentence.encode())
     connectionSocket.close()
 
+getLAN = socket(AF_INET, SOCK_DGRAM)
+getLAN.connect(("1.1.1.1", 80))
+serverIP = getLAN.getsockname()[0]
+getLAN.close()
 
 serverPort = 12000
-hostname = gethostname()
-serverIP = gethostbyname(hostname)
+#hostname = gethostname()
+#serverIP = gethostbyname(hostname)
 serverSocket = socket(AF_INET, SOCK_STREAM)
 serverSocket.bind(("", serverPort))
 serverSocket.listen(2)
