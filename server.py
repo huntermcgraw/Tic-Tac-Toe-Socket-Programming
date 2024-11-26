@@ -1,4 +1,3 @@
-from asyncio import Event
 from queue import Queue
 from socket import *
 import threading
@@ -6,36 +5,31 @@ from _thread import *
 
 def Player1(q):
     connectionSocket, addr = serverSocket.accept()
-    host = connectionSocket.recv(1024).decode()
-    if host == 'localhost':
-        print("localhost connected")
-        connectionSocket.send(serverIP.encode())
-    else:
-        print("Another computer has connected")
+    connectionSocket.send(serverIP.encode())
+    print("localhost has connected")
     while True:
+        connectionSocket.recv(1024).decode()
         sentence = connectionSocket.recv(1024).decode()
         capitalizedSentence = sentence.upper()
-        event = Event()
+        event = threading.Event()
         q.put((capitalizedSentence, event))
-        connectionSocket.send(capitalizedSentence.encode())
         event.wait()
+        data, event = q.get()
+        connectionSocket.send(data.encode())
+        connectionSocket.recv(1024).decode()
     connectionSocket.close()
 
 
 def Player2(q):
     connectionSocket, addr = serverSocket.accept()
-    host = connectionSocket.recv(1024).decode()
-    if host == 'localhost':
-        print("localhost connected")
-        connectionSocket.send(serverIP.encode())
-    else:
-        print("Another computer has connected")
+    print("Another computer has connected")
     while True:
         data, event = q.get()
         connectionSocket.send(data.encode())
+        event.task_done()
         sentence = connectionSocket.recv(1024).decode()
         capitalizedSentence = sentence.upper()
-        event = Event()
+        event = threading.Event()
         q.put((capitalizedSentence, event))
         event.wait()
     connectionSocket.close()
