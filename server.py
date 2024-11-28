@@ -21,7 +21,7 @@ def player(clientSocket):
         try:
             message = clientSocket.recv(1024)
             if message:
-                game.make_move(int(message))
+                game.choice(int(message))
                 board = game.get_board()
                 response = print_board(board)
                 print(response)
