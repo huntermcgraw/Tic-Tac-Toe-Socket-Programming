@@ -4,6 +4,7 @@ from tictactoe import TicTacToe
 
 clients = []
 game = TicTacToe()
+lock_input = threading.Lock()
 
 def print_board(board):
     board_str = '\n|'
@@ -16,21 +17,22 @@ def print_board(board):
 
     return board_str
 
-def player(clientSocket):
+def player(clientSocket, lock):
     while True:
-        try:
-            message = clientSocket.recv(1024)
-            if message:
-                game.choice(int(message))
-                board = game.get_board()
-                response = print_board(board)
-                print(response)
-                for client in clients:
-                    client.send(response.encode())
-            else:
+        with lock:
+            try:
+                message = clientSocket.recv(1024)
+                if message:
+                    game.choice(int(message))
+                    board = game.get_board()
+                    response = print_board(board)
+                    print(response)
+                    for client in clients:
+                        client.send(response.encode())
+                else:
+                    break
+            except:
                 break
-        except:
-            break
     clients.remove(clientSocket)
     clientSocket.close()
 
@@ -54,4 +56,4 @@ while True:
     else:
         print("Another computer has connected")
     clients.append(connectionSocket)
-    threading.Thread(target=player, args=(connectionSocket,), daemon=True).start()
+    threading.Thread(target=player, args=(connectionSocket, lock_input), daemon=True).start()

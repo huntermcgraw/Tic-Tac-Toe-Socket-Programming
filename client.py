@@ -2,19 +2,21 @@ from socket import *
 import threading
 import time
 
+lock_input = threading.Lock()
+
 serverName = input('If you are hosting the server on your computer, enter "localhost".\n'
                    'Otherwise, enter the IP given by the host.\n'
                    'Type here: ')
 
 def get_board(clientSocket):
     while True:
-        try:
-            message = clientSocket.recv(1024)
-            if message:
-                print(message.decode())
-        except:
-            print("Disconnected from server.")
-            break
+            try:
+                message = clientSocket.recv(1024)
+                if message:
+                    print(message.decode())
+            except:
+                print("Disconnected from server.")
+                break
 
 serverPort = 12000
 clientSocket = socket(AF_INET, SOCK_STREAM)
@@ -25,12 +27,13 @@ if serverName == 'localhost':
     print(serverIP.decode())
 threading.Thread(target=get_board, args=(clientSocket,), daemon=True).start()
 while True:
-    message = input("\nEnter index (0-8): ")
-    clientSocket.send(message.encode())
+    with lock_input:
+        message = input("\nEnter index (0-8): ")
+        clientSocket.send(message.encode())
 
-    time.sleep(.1)
+        time.sleep(.1)
 
-    if message == 'q':
-        break
+        if message == 'q':
+            break
 
 clientSocket.close()
