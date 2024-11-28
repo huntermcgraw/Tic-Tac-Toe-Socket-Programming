@@ -5,7 +5,7 @@ serverName = input('If you are hosting the server on your computer, enter "local
                    'Otherwise, enter the IP given by the host.\n'
                    'Type here: ')
 
-def receive_messages(clientSocket):
+def get_board(clientSocket):
     while True:
         try:
             message = clientSocket.recv(1024)
@@ -22,7 +22,7 @@ clientSocket.send(serverName.encode())
 if serverName == 'localhost':
     serverIP = clientSocket.recv(1024)
     print(serverIP.decode())
-threading.Thread(target=receive_messages, args=(clientSocket,), daemon=True).start()
+threading.Thread(target=get_board, args=(clientSocket,), daemon=True).start()
 while True:
     message = input("")
     clientSocket.send(message.encode())

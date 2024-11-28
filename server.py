@@ -5,26 +5,31 @@ from tictactoe import TicTacToe
 clients = []
 game = TicTacToe()
 
-def generate_response(board):
-    responseString = ''
-    for i in range(len(board)):
-        if i == len(board) - 1:
-            responseString = responseString + board[i]
+def print_board(board):
+    board_str = ''
+    i = 0
+    while i < len(board):
+        if (i + 1) % 3 == 0:
+            print()
+        if i == (len(board) - 1):
+            board_str = board_str + board[i]
         else:
-            responseString = responseString + board[i] + '.'
-    return responseString
+            board_str = board_str + board[i] + '|'
+        i += 1
 
-def handle_client(clientSocket):
+    return board_str
+
+def player(clientSocket):
     while True:
         try:
             message = clientSocket.recv(1024)
             if message:
                 game.make_move(int(message))
                 board = game.get_board()
-                response = generate_response(board)
+                response = print_board(board)
                 print(response)
                 for client in clients:
-                    client.send(response.encode('utf-8'))
+                    client.send(response.encode())
             else:
                 break
         except:
@@ -40,10 +45,16 @@ getLAN.close()
 serverPort = 12000
 serverSocket = socket(AF_INET, SOCK_STREAM)
 serverSocket.bind(("", serverPort))
-serverSocket.listen(2)
+serverSocket.listen()
 
 print("The server is ready to receive")
 while True:
     connectionSocket, addr = serverSocket.accept()
+    host = connectionSocket.recv(1024).decode()
+    if host == 'localhost':
+        print("localhost connected")
+        connectionSocket.send(serverIP.encode())
+    else:
+        print("Another computer has connected")
     clients.append(connectionSocket)
-    threading.Thread(target=handle_client, args=(connectionSocket,), daemon=True).start()
+    threading.Thread(target=player, args=(connectionSocket,), daemon=True).start()
