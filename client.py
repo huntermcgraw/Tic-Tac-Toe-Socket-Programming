@@ -1,5 +1,6 @@
 from socket import *
 import threading
+import time
 
 serverName = input('If you are hosting the server on your computer, enter "localhost".\n'
                    'Otherwise, enter the IP given by the host.\n'
@@ -26,6 +27,8 @@ threading.Thread(target=get_board, args=(clientSocket,), daemon=True).start()
 while True:
     message = input("\nEnter index (0-8): ")
     clientSocket.send(message.encode())
+
+    time.sleep(.1)
 
     if message == 'q':
         break

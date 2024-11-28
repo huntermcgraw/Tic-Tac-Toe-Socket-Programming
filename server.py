@@ -6,7 +6,7 @@ clients = []
 game = TicTacToe()
 
 def print_board(board):
-    board_str = '|'
+    board_str = '\n|'
     i = 0
     while i < len(board):
         if (i != 0) and (i % 3 == 0):
