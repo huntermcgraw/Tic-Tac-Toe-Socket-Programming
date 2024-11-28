@@ -24,7 +24,7 @@ if serverName == 'localhost':
     print(serverIP.decode())
 threading.Thread(target=get_board, args=(clientSocket,), daemon=True).start()
 while True:
-    message = input("")
+    message = input("\nEnter index (0-8): ")
     clientSocket.send(message.encode())
 
     if message == 'q':
