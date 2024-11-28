@@ -1,10 +1,13 @@
 from socket import *
 import threading
 from tictactoe import TicTacToe
+import queue
 
 clients = []
 game = TicTacToe()
 lock_input = threading.Lock()
+turn = threading.Event()
+q = queue.Queue()
 
 def print_board(board):
     board_str = '\n|'
@@ -17,8 +20,10 @@ def print_board(board):
 
     return board_str
 
-def player(clientSocket, lock):
+def player(clientSocket, lock, turn, q):
     while True:
+        turn.wait()
+        turn.clear()
         with lock:
             try:
                 message = clientSocket.recv(1024)
@@ -33,6 +38,8 @@ def player(clientSocket, lock):
                     break
             except:
                 break
+
+    print("A computer has disconnected")
     clients.remove(clientSocket)
     clientSocket.close()
 
@@ -56,4 +63,6 @@ while True:
     else:
         print("Another computer has connected")
     clients.append(connectionSocket)
-    threading.Thread(target=player, args=(connectionSocket, lock_input), daemon=True).start()
+
+    turn.set()
+    threading.Thread(target=player, args=(connectionSocket, lock_input, turn, q), daemon=True).start()
