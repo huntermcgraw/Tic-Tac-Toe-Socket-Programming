@@ -1,4 +1,3 @@
-import time
 import pygame
 import client
 import server
@@ -40,7 +39,6 @@ def run_game():
                         client1.start()
                         client1.join()
                         print("client closed")
-                        time.sleep(.1)
                         server1.join()
                         print("server closed")
                         quit()
