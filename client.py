@@ -38,7 +38,7 @@ def check_win(board_array, curr):
     return False
 
 
-def get_board(clientSocket, curr_player, other_player):
+def get_board(clientSocket, curr_player, other_player, server_ip):
     global board_array
     global opp_score
     score = 0
@@ -51,10 +51,15 @@ def get_board(clientSocket, curr_player, other_player):
     font = pygame.font.SysFont('arial', 40)
     p1text = font.render(f'You: {opp_score}', True, white, black)
     p2text = font.render(f'Other Player: {score}', True, white, black)
+    iptext = font.render(f'{server_ip}', True, white, black)
     p1textRect = p1text.get_rect()
     p2textRect = p1text.get_rect()
+    iptextRect = iptext.get_rect()
     p1textRect.center = (1100, 50)
     p2textRect.center = (1100, 120)
+    iptextRect.center = (1050, 870)
+
+
 
     resetText = font.render('Reset Board', True, black, white)
     resetRect = resetText.get_rect()
@@ -65,7 +70,7 @@ def get_board(clientSocket, curr_player, other_player):
 
         game.blit(p1text, p1textRect)
         game.blit(p2text, p2textRect)
-
+        game.blit(iptext, iptextRect)
         game.blit(resetText, resetRect)
 
         for i in range(len(board_array)):
@@ -76,6 +81,7 @@ def get_board(clientSocket, curr_player, other_player):
 
         p1text = font.render(f'You: {score}', True, white, black)
         p2text = font.render(f'Other Player: {opp_score}', True, white, black)
+        iptext = font.render(f'{server_ip}', True, white, black)
 
         pygame.display.update()
 
@@ -137,7 +143,8 @@ def start_client(serverName):
     clientSocket.send(serverName.encode())
     if serverName == 'localhost':
         serverIP = clientSocket.recv(1024)
-        print(serverIP.decode())
+        serverIP = serverIP.decode()
+        print(serverIP)
         curr_player = 'X'
         other_player = 'O'
     else:
@@ -145,7 +152,7 @@ def start_client(serverName):
         other_player = 'X'
 
     threading.Thread(target=get_array, args=(clientSocket, other_player), daemon=True).start()
-    get_board(clientSocket, curr_player, other_player)
+    get_board(clientSocket, curr_player, other_player, serverIP)
 
 
 
