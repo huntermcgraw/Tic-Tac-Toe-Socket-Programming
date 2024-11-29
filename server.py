@@ -1,5 +1,6 @@
 from socket import *
 import threading
+import time
 from tictactoe import TicTacToe
 
 clients = []
@@ -19,6 +20,9 @@ def print_board(board):
     return board_str
 
 
+
+
+
 def player(clientSocket):
     global board_array
     while True:
@@ -26,6 +30,8 @@ def player(clientSocket):
             board_string = clientSocket.recv(1024).decode()
             if board_string:
                 board_array = [i for i in board_string]
+
+
                 print(board_array)
                 board_str = "".join(board_array)
                 for client in clients:

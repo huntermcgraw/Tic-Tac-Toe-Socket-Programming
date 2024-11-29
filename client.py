@@ -3,7 +3,7 @@ import threading
 import pygame
 
 
-WIDTH = 900
+WIDTH = 1500
 HEIGHT = 900
 board_image = pygame.image.load("img/board.png")
 index0 = pygame.Rect(0, 0, 300, 300)
@@ -25,16 +25,59 @@ serverName = input('If you are hosting the server on your computer, enter "local
                    'Otherwise, enter the IP given by the host.\n'
                    'Type here: ')
 
+pygame.init()
+game = pygame.display.set_mode((WIDTH, HEIGHT))
 
-def get_board(clientSocket, curr_player):
+
+
+def check_win(board_array, curr):
+    win_cases = [(0,1,2), (3,4,5), (6,7,8), (0,3,6), (1,4,7), (2,5,8), (0,4,8), (2,4,6)]
+    for i in win_cases:
+        count = 0
+        for j in i:
+            if board_array[j] == curr:
+                count += 1
+        if count == 3:
+            return True
+
+    return False
+
+
+def get_board(clientSocket, curr_player, other_player):
     global board_array
+    score = 0
+    opp_score = 0
+
+    white = (255, 255, 255)
+    black = (0, 0, 0)
+    font = pygame.font.SysFont('arial', 40)
+    p1text = font.render(f'You: {opp_score}', True, white, black)
+    p2text = font.render(f'Other Player: {score}', True, white, black)
+    p1textRect = p1text.get_rect()
+    p2textRect = p1text.get_rect()
+    p1textRect.center = (1100, 50)
+    p2textRect.center = (1100, 120)
+
+    resetText = font.render('Reset Board', True, black, white)
+    resetRect = resetText.get_rect()
+    resetRect.center = (1100, 600)
+
     while True:
         game.blit(board_image, (0, 0))
+
+        game.blit(p1text, p1textRect)
+        game.blit(p2text, p2textRect)
+
+        game.blit(resetText, resetRect)
+
         for i in range(len(board_array)):
             if board_array[i] == 'X':
                 game.blit(x, index_spaces[i])
             if board_array[i] == 'O':
                 game.blit(o, index_spaces[i])
+
+        p1text = font.render(f'You: {score}', True, white, black)
+        p2text = font.render(f'Other Player: {opp_score}', True, white, black)
 
         pygame.display.update()
 
@@ -43,11 +86,32 @@ def get_board(clientSocket, curr_player):
             if event.type == pygame.QUIT:
                 return False
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                for i in range(len(index)):
-                    if index[i].collidepoint(event.pos):
-                        board_array[i] = curr_player
+            if not (check_win(board_array, curr_player) or check_win(board_array, other_player)):
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if resetRect.collidepoint(event.pos):
+                        board_array = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
                         send_array(clientSocket)
+                        break
+
+
+                    for i in range(len(index)):
+                        if index[i].collidepoint(event.pos):
+                            board_array[i] = curr_player
+                            send_array(clientSocket)
+                            break
+                    if check_win(board_array, curr_player):
+                        score += 1
+                    if check_win(board_array, other_player):
+                        opp_score += 1
+            else:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if resetRect.collidepoint(event.pos):
+                        board_array = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+                        send_array(clientSocket)
+                        break
+
+
+
 
 
 def get_array():
@@ -72,10 +136,11 @@ if serverName == 'localhost':
     serverIP = clientSocket.recv(1024)
     print(serverIP.decode())
     curr_player = 'X'
+    other_player = 'O'
 else:
     curr_player = 'O'
-pygame.init()
-game = pygame.display.set_mode((WIDTH, HEIGHT))
+    other_player = 'X'
+
 
 threading.Thread(target=get_array, daemon=True).start()
-get_board(clientSocket, curr_player)
+get_board(clientSocket, curr_player, other_player)
