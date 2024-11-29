@@ -40,6 +40,7 @@ def check_win(board_array, curr):
 
 def get_board(clientSocket, curr_player, other_player):
     global board_array
+    global opp_score
     score = 0
     opp_score = 0
 
@@ -99,8 +100,6 @@ def get_board(clientSocket, curr_player, other_player):
                             break
                 if check_win(board_array, curr_player):
                     score += 1
-                if check_win(board_array, other_player):
-                    opp_score += 1
             else:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if resetRect.collidepoint(event.pos):
@@ -112,12 +111,15 @@ def get_board(clientSocket, curr_player, other_player):
 
 
 
-def get_array(clientSocket):
+def get_array(clientSocket, other_player):
     global board_array
+    global opp_score
     while True:
         board_string = clientSocket.recv(1024).decode()
         if board_string:
             board_array = [i for i in board_string]
+            if check_win(board_array, other_player):
+                opp_score += 1
 
 
 def send_array(clientSocket):
@@ -142,7 +144,7 @@ def start_client(serverName):
         curr_player = 'O'
         other_player = 'X'
 
-    threading.Thread(target=get_array, args=(clientSocket,), daemon=True).start()
+    threading.Thread(target=get_array, args=(clientSocket, other_player), daemon=True).start()
     get_board(clientSocket, curr_player, other_player)
 
 
