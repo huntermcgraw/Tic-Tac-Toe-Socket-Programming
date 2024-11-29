@@ -21,13 +21,8 @@ x = pygame.image.load("img/x.png")
 o = pygame.image.load("img/o.png")
 board_array = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
 
-serverName = input('If you are hosting the server on your computer, enter "localhost".\n'
-                   'Otherwise, enter the IP given by the host.\n'
-                   'Type here: ')
 
 pygame.init()
-game = pygame.display.set_mode((WIDTH, HEIGHT))
-
 
 
 def check_win(board_array, curr):
@@ -50,6 +45,8 @@ def get_board(clientSocket, curr_player, other_player):
 
     white = (255, 255, 255)
     black = (0, 0, 0)
+
+    game = pygame.display.set_mode((WIDTH, HEIGHT))
     font = pygame.font.SysFont('arial', 40)
     p1text = font.render(f'You: {opp_score}', True, white, black)
     p2text = font.render(f'Other Player: {score}', True, white, black)
@@ -84,7 +81,8 @@ def get_board(clientSocket, curr_player, other_player):
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
-                return False
+                clientSocket.send('q'.encode())
+                quit()
 
             if not (check_win(board_array, curr_player) or check_win(board_array, other_player)):
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -114,7 +112,7 @@ def get_board(clientSocket, curr_player, other_player):
 
 
 
-def get_array():
+def get_array(clientSocket):
     global board_array
     while True:
         board_string = clientSocket.recv(1024).decode()
@@ -128,19 +126,26 @@ def send_array(clientSocket):
     clientSocket.send(board_str.encode())
 
 
-serverPort = 12000
-clientSocket = socket(AF_INET, SOCK_STREAM)
-clientSocket.connect((serverName, serverPort))
-clientSocket.send(serverName.encode())
-if serverName == 'localhost':
-    serverIP = clientSocket.recv(1024)
-    print(serverIP.decode())
-    curr_player = 'X'
-    other_player = 'O'
-else:
-    curr_player = 'O'
-    other_player = 'X'
+def start_client(serverName):
+    serverPort = 12000
+    clientSocket = socket(AF_INET, SOCK_STREAM)
+
+    clientSocket.connect((serverName, serverPort))
+
+    clientSocket.send(serverName.encode())
+    if serverName == 'localhost':
+        serverIP = clientSocket.recv(1024)
+        print(serverIP.decode())
+        curr_player = 'X'
+        other_player = 'O'
+    else:
+        curr_player = 'O'
+        other_player = 'X'
+
+    threading.Thread(target=get_array, args=(clientSocket,), daemon=True).start()
+    get_board(clientSocket, curr_player, other_player)
 
 
-threading.Thread(target=get_array, daemon=True).start()
-get_board(clientSocket, curr_player, other_player)
+
+
+#start_client("localhost")
