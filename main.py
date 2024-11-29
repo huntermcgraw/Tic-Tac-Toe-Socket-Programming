@@ -35,6 +35,7 @@ def run_game():
                     if startRect.collidepoint(event.pos):
                         server1 = threading.Thread(target=server.run_server, daemon=True)
                         server1.start()
+                        pygame.display.quit()
                         client1 = threading.Thread(target=client.start_client, args=("localhost",), daemon=True)
                         client1.start()
                         client1.join()
@@ -46,6 +47,7 @@ def run_game():
                     if joinRect.collidepoint(event.pos):
                         server_ip = enter_ip()
                         print(server_ip)
+                        pygame.display.quit()
                         client1 = threading.Thread(target=client.start_client, args=(server_ip,), daemon=True)
                         client1.start()
                         client1.join()

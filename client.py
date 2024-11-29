@@ -97,10 +97,10 @@ def get_board(clientSocket, curr_player, other_player):
                             board_array[i] = curr_player
                             send_array(clientSocket)
                             break
-                    if check_win(board_array, curr_player):
-                        score += 1
-                    if check_win(board_array, other_player):
-                        opp_score += 1
+                if check_win(board_array, curr_player):
+                    score += 1
+                if check_win(board_array, other_player):
+                    opp_score += 1
             else:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if resetRect.collidepoint(event.pos):
