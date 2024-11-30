@@ -2,7 +2,6 @@ from socket import *
 import threading
 import pygame
 
-
 WIDTH = 1500
 HEIGHT = 900
 board_image = pygame.image.load("img/board.png")
@@ -21,9 +20,7 @@ x = pygame.image.load("img/x.png")
 o = pygame.image.load("img/o.png")
 board_array = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
 
-
 pygame.init()
-
 
 def check_win(board_array, curr):
     win_cases = [(0,1,2), (3,4,5), (6,7,8), (0,3,6), (1,4,7), (2,5,8), (0,4,8), (2,4,6)]
@@ -55,15 +52,13 @@ def get_board(clientSocket, curr_player, other_player, server_ip):
     p1textRect = p1text.get_rect()
     p2textRect = p1text.get_rect()
     iptextRect = iptext.get_rect()
-    p1textRect.center = (1100, 50)
-    p2textRect.center = (1100, 120)
-    iptextRect.center = (1050, 870)
-
-
+    p1textRect.center = (1100, 150)
+    p2textRect.center = (1100, 220)
+    iptextRect.center = (1020, 870)
 
     resetText = font.render('Reset Board', True, black, white)
     resetRect = resetText.get_rect()
-    resetRect.center = (1100, 600)
+    resetRect.center = (1385, 870)
 
     while True:
         game.blit(board_image, (0, 0))
@@ -79,8 +74,8 @@ def get_board(clientSocket, curr_player, other_player, server_ip):
             if board_array[i] == 'O':
                 game.blit(o, index_spaces[i])
 
-        p1text = font.render(f'You: {score}', True, white, black)
-        p2text = font.render(f'Other Player: {opp_score}', True, white, black)
+        p1text = font.render(f'({curr_player}) You: {score}', True, white, black)
+        p2text = font.render(f'({other_player}) Other Player: {opp_score}', True, white, black)
         iptext = font.render(f'{server_ip}', True, white, black)
 
         pygame.display.update()
@@ -101,9 +96,10 @@ def get_board(clientSocket, curr_player, other_player, server_ip):
 
                     for i in range(len(index)):
                         if index[i].collidepoint(event.pos):
-                            board_array[i] = curr_player
-                            send_array(clientSocket)
-                            break
+                            if board_array[i] == ' ':
+                                board_array[i] = curr_player
+                                send_array(clientSocket)
+                                break
                 if check_win(board_array, curr_player):
                     score += 1
             else:
@@ -148,13 +144,9 @@ def start_client(serverName):
         curr_player = 'X'
         other_player = 'O'
     else:
+        serverIP = serverName
         curr_player = 'O'
         other_player = 'X'
 
     threading.Thread(target=get_array, args=(clientSocket, other_player), daemon=True).start()
     get_board(clientSocket, curr_player, other_player, serverIP)
-
-
-
-
-#start_client("localhost")

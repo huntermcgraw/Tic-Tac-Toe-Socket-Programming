@@ -58,5 +58,3 @@ def player(serverSocket, clientSocket, clients):
         print("Server has stopped running")
         serverSocket.shutdown(SHUT_RDWR)  # Disable both reading and writing
         serverSocket.close()
-
-#run_server()
