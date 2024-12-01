@@ -16,6 +16,9 @@ startRect = start_game.get_rect()
 joinRect = join_game.get_rect()
 startRect.center = (WIDTH // 2, (HEIGHT - 70) // 2)
 joinRect.center = (WIDTH // 2, (HEIGHT + 70) // 2)
+iptext = font.render('Enter IP: ', True, black, white)
+ipRect = iptext.get_rect()
+ipRect.center = (600,600)
 
 
 def run_game():
@@ -56,18 +59,12 @@ def run_game():
 def enter_ip():
     ip = ''
     while True:
-        iptext = font.render('Enter IP: ', True, black, white)
-        ipRect = iptext.get_rect()
-        ipRect.center = (600,600)
 
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
                 quit()
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if ipRect.collidepoint(event.pos):
-                    active = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     return ip

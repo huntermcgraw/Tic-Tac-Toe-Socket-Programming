@@ -19,6 +19,8 @@ index_spaces = [(75, 75), (375, 75), (675, 75), (75, 375), (375, 375), (675, 375
 x = pygame.image.load("img/x.png")
 o = pygame.image.load("img/o.png")
 board_array = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+white = (255, 255, 255)
+black = (0, 0, 0)
 
 pygame.init()
 
@@ -41,8 +43,7 @@ def get_board(clientSocket, curr_player, other_player, server_ip):
     score = 0
     opp_score = 0
 
-    white = (255, 255, 255)
-    black = (0, 0, 0)
+
 
     game = pygame.display.set_mode((WIDTH, HEIGHT))
     font = pygame.font.SysFont('arial', 40)
@@ -62,7 +63,6 @@ def get_board(clientSocket, curr_player, other_player, server_ip):
 
     while True:
         game.blit(board_image, (0, 0))
-
         game.blit(p1text, p1textRect)
         game.blit(p2text, p2textRect)
         game.blit(iptext, iptextRect)
@@ -93,13 +93,13 @@ def get_board(clientSocket, curr_player, other_player, server_ip):
                         send_array(clientSocket)
                         break
 
-
-                    for i in range(len(index)):
-                        if index[i].collidepoint(event.pos):
-                            if board_array[i] == ' ':
-                                board_array[i] = curr_player
-                                send_array(clientSocket)
-                                break
+                    if take_turn(curr_player, board_array):
+                        for i in range(len(index)):
+                            if index[i].collidepoint(event.pos):
+                                if board_array[i] == ' ':
+                                    board_array[i] = curr_player
+                                    send_array(clientSocket)
+                                    break
                 if check_win(board_array, curr_player):
                     score += 1
             else:
@@ -110,12 +110,27 @@ def get_board(clientSocket, curr_player, other_player, server_ip):
                         break
 
 
-
-
+def take_turn(curr_player, board_array):
+    x_count = 0
+    o_count = 0
+    for i in board_array:
+        if i == 'X':
+            x_count += 1
+        elif i == 'O':
+            o_count += 1
+    if curr_player == 'X':
+        if x_count == o_count:
+            return True
+        return False
+    else:
+        if x_count > o_count:
+            return True
+        return False
 
 def get_array(clientSocket, other_player):
     global board_array
     global opp_score
+
     while True:
         board_string = clientSocket.recv(1024).decode()
         if board_string:
@@ -126,6 +141,7 @@ def get_array(clientSocket, other_player):
 
 def send_array(clientSocket):
     global board_array
+
     board_str = "".join(board_array)
     clientSocket.send(board_str.encode())
 

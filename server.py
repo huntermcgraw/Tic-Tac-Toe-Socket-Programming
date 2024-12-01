@@ -3,7 +3,6 @@ import threading
 
 def run_server():
     clients = []
-    board_array = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
     getLAN = socket(AF_INET, SOCK_DGRAM)
     getLAN.connect(("1.1.1.1", 80))
     serverIP = getLAN.getsockname()[0]
@@ -37,7 +36,7 @@ def run_server():
 
 def player(serverSocket, clientSocket, clients):
     global board_array
-    global running
+
     while True:
         try:
             board_string = clientSocket.recv(1024).decode()
@@ -56,5 +55,5 @@ def player(serverSocket, clientSocket, clients):
     clientSocket.close()
     if not clients:
         print("Server has stopped running")
-        serverSocket.shutdown(SHUT_RDWR)  # Disable both reading and writing
+        serverSocket.shutdown(SHUT_RDWR)
         serverSocket.close()
