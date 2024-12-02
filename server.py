@@ -1,45 +1,45 @@
 from socket import *
 import threading
 
+
 def run_server():
     clients = []
-    getLAN = socket(AF_INET, SOCK_DGRAM)
-    getLAN.connect(("1.1.1.1", 80))
-    serverIP = getLAN.getsockname()[0]
-    getLAN.close()
+    get_LAN = socket(AF_INET, SOCK_DGRAM)
+    get_LAN.connect(("1.1.1.1", 80))
+    server_IP = get_LAN.getsockname()[0]
+    get_LAN.close()
 
-    serverPort = 12000
-    serverSocket = socket(AF_INET, SOCK_STREAM)
+    server_port = 12000
+    server_socket = socket(AF_INET, SOCK_STREAM)
 
-    serverSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    serverSocket.bind(("", serverPort))
-    serverSocket.listen()
+    server_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+    server_socket.bind(("", server_port))
+    server_socket.listen()
 
     print("The server is ready to receive")
     while True:
 
         try:
-            connectionSocket, addr = serverSocket.accept()
+            connection_socket, addr = server_socket.accept()
         except OSError:
             quit()
 
-
-        host = connectionSocket.recv(1024).decode()
+        host = connection_socket.recv(1024).decode()
         if host == "localhost":
             print("localhost connected")
-            connectionSocket.send(serverIP.encode())
+            connection_socket.send(server_IP.encode())
         else:
             print("Another computer has connected")
-        clients.append(connectionSocket)
-        threading.Thread(target=player, args=(serverSocket, connectionSocket,clients), daemon=True).start()
+        clients.append(connection_socket)
+        threading.Thread(target=player, args=(server_socket, connection_socket, clients), daemon=True).start()
 
 
-def player(serverSocket, clientSocket, clients):
+def player(server_socket, client_socket, clients):
     global board_array
 
     while True:
         try:
-            board_string = clientSocket.recv(1024).decode()
+            board_string = client_socket.recv(1024).decode()
             if board_string == 'q':
                 break
             if board_string:
@@ -51,9 +51,9 @@ def player(serverSocket, clientSocket, clients):
                 break
         except:
             break
-    clients.remove(clientSocket)
-    clientSocket.close()
+    clients.remove(client_socket)
+    client_socket.close()
     if not clients:
         print("Server has stopped running")
-        serverSocket.shutdown(SHUT_RDWR)
-        serverSocket.close()
+        server_socket.shutdown(SHUT_RDWR)
+        server_socket.close()

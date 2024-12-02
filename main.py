@@ -6,28 +6,28 @@ import threading
 pygame.init()
 WIDTH = 1500
 HEIGHT = 900
-white = (255, 255, 255)
-black = (0, 0, 0)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 game = pygame.display.set_mode((WIDTH, HEIGHT))
-font = pygame.font.SysFont('arial', 40)
-start_game = font.render('Start a game', True, black, white)
-join_game = font.render('Join a game', True, black, white)
-startRect = start_game.get_rect()
-joinRect = join_game.get_rect()
-startRect.center = (WIDTH // 2, (HEIGHT - 70) // 2)
-joinRect.center = (WIDTH // 2, (HEIGHT + 70) // 2)
-iptext = font.render('Enter IP: ', True, black, white)
-ipRect = iptext.get_rect()
-ipRect.center = (600,600)
+font = pygame.font.SysFont("arial", 40)
+start_game = font.render("Start game", True, BLACK, WHITE)
+join_game = font.render("Join game", True, BLACK, WHITE)
+start_rect = start_game.get_rect()
+join_rect = join_game.get_rect()
+start_rect.center = (WIDTH // 2, (HEIGHT - 70) // 2)
+join_rect.center = (WIDTH // 2, (HEIGHT + 70) // 2)
+iptext = font.render("Enter IP: ", True, BLACK, WHITE)
+ip_rect = iptext.get_rect()
+ip_rect.center = (600, 600)
 
 
 def run_game():
     created = False
     while True:
         if not created:
-            game.fill(white)
-            game.blit(start_game, startRect)
-            game.blit(join_game, joinRect)
+            game.fill(WHITE)
+            game.blit(start_game, start_rect)
+            game.blit(join_game, join_rect)
             pygame.display.update()
             events = pygame.event.get()
             for event in events:
@@ -35,7 +35,7 @@ def run_game():
                     quit()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if startRect.collidepoint(event.pos):
+                    if start_rect.collidepoint(event.pos):
                         server1 = threading.Thread(target=server.run_server, daemon=True)
                         server1.start()
                         pygame.display.quit()
@@ -47,17 +47,20 @@ def run_game():
                         print("server closed")
                         quit()
 
-                    if joinRect.collidepoint(event.pos):
+                    if join_rect.collidepoint(event.pos):
                         server_ip = enter_ip()
                         print(server_ip)
                         pygame.display.quit()
-                        client1 = threading.Thread(target=client.start_client, args=(server_ip,), daemon=True)
+                        client1 = threading.Thread(
+                            target=client.start_client, args=(server_ip,), daemon=True
+                        )
                         client1.start()
                         client1.join()
                         quit()
 
+
 def enter_ip():
-    ip = ''
+    ip = ""
     while True:
 
         events = pygame.event.get()
@@ -73,13 +76,13 @@ def enter_ip():
                 else:
                     ip += event.unicode
 
-
-        game.blit(iptext, ipRect)
-        pygame.draw.rect(game, white, (700, 575, 350, 50))
-        pygame.draw.rect(game, black, (700, 575, 350, 50), 1)
-        ip_input = font.render(ip, True, black)
-        game.blit(ip_input, (705,575))
+        game.blit(iptext, ip_rect)
+        pygame.draw.rect(game, WHITE, (700, 575, 350, 50))
+        pygame.draw.rect(game, BLACK, (700, 575, 350, 50), 1)
+        ip_input = font.render(ip, True, BLACK)
+        game.blit(ip_input, (705, 575))
         pygame.display.flip()
+
 
 if __name__ == "__main__":
     run_game()
