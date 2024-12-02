@@ -78,21 +78,23 @@ def get_board(client_socket, curr_player, other_player, server_ip):
     p1_text_rect.center = (1100, 150)
     p2_text_rect.center = (1100, 220)
     ip_text_rect.center = (1020, 870)
-
     reset_text = font.render("Reset Board", True, black, white)
     reset_rect = reset_text.get_rect()
     reset_rect.center = (1385, 870)
 
     while True:
+
         game.blit(board_image, (0, 0))
         game.blit(p1_text, p1_text_rect)
         game.blit(p2_text, p2_text_rect)
         game.blit(ip_text, ip_text_rect)
         game.blit(reset_text, reset_rect)
+
         if take_turn(curr_player, board_array):
             game.blit(turn, turn_rect)
         else:
             game.blit(not_turn, not_turn_rect)
+
         for i in range(len(board_array)):
             if board_array[i] == "X":
                 game.blit(x, index_spaces[i])
@@ -102,6 +104,7 @@ def get_board(client_socket, curr_player, other_player, server_ip):
         p1_text = font.render(f"({curr_player}) You: {score}", True, white, black)
         p2_text = font.render(f"({other_player}) Opponent: {opp_score}", True, white, black)
         ip_text = font.render(f"{server_ip}", True, white, black)
+
         pygame.display.update()
 
         events = pygame.event.get()
@@ -110,10 +113,7 @@ def get_board(client_socket, curr_player, other_player, server_ip):
                 client_socket.send("q".encode())
                 quit()
 
-            if not (
-                check_win(board_array, curr_player)
-                or check_win(board_array, other_player)
-            ):
+            if not (check_win(board_array, curr_player) or check_win(board_array, other_player)):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if reset_rect.collidepoint(event.pos):
                         board_array = [" ", " ", " ", " ", " ", " ", " ", " ", " "]
@@ -127,8 +127,10 @@ def get_board(client_socket, curr_player, other_player, server_ip):
                                     board_array[i] = curr_player
                                     send_array(client_socket)
                                     break
+
                 if check_win(board_array, curr_player):
                     score += 1
+
             else:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if reset_rect.collidepoint(event.pos):
@@ -140,11 +142,13 @@ def get_board(client_socket, curr_player, other_player, server_ip):
 def take_turn(curr_player, board_array):
     x_count = 0
     o_count = 0
+
     for i in board_array:
         if i == "X":
             x_count += 1
         elif i == "O":
             o_count += 1
+
     if curr_player == "X":
         if x_count == o_count:
             return True
@@ -192,7 +196,5 @@ def start_client(server_name):
         curr_player = "O"
         other_player = "X"
 
-    threading.Thread(
-        target=get_array, args=(client_socket, other_player), daemon=True
-    ).start()
+    threading.Thread(target=get_array, args=(client_socket, other_player), daemon=True).start()
     get_board(client_socket, curr_player, other_player, server_IP)
