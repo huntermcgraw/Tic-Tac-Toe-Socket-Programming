@@ -70,11 +70,13 @@ def get_board(client_socket, curr_player, other_player, server_ip):
     ip_text = font.render(f"{server_ip}", True, white, black)
     turn = font.render(f"Your turn!", True, white, black)
     not_turn = font.render(f"Opponents turn!", True, white, black)
+    game_over = font.render(f"Game over!", True, white, black)
     p1_text_rect = p1_text.get_rect()
     p2_text_rect = p1_text.get_rect()
     ip_text_rect = ip_text.get_rect()
     turn_rect = turn.get_rect()
     not_turn_rect = turn.get_rect()
+    game_over_rect = game_over.get_rect()
     p1_text_rect.center = (1100, 150)
     p2_text_rect.center = (1100, 220)
     ip_text_rect.center = (1020, 870)
@@ -90,10 +92,13 @@ def get_board(client_socket, curr_player, other_player, server_ip):
         game.blit(ip_text, ip_text_rect)
         game.blit(reset_text, reset_rect)
 
-        if take_turn(curr_player, board_array):
-            game.blit(turn, turn_rect)
+        if not (check_win(board_array, curr_player) or check_win(board_array, other_player)):
+            if take_turn(curr_player, board_array):
+                game.blit(turn, turn_rect)
+            else:
+                game.blit(not_turn, not_turn_rect)
         else:
-            game.blit(not_turn, not_turn_rect)
+            game.blit(game_over, game_over_rect)
 
         for i in range(len(board_array)):
             if board_array[i] == "X":
