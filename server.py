@@ -60,5 +60,4 @@ def player(server_socket, client_socket, clients):
 
     if not clients:
         print("Server has stopped running")
-        server_socket.shutdown(SHUT_RDWR)
         server_socket.close()
